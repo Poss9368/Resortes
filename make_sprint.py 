@@ -1,0 +1,105 @@
+import pandas as pd 
+import numpy as np
+import random 
+import matplotlib.pyplot as plt
+
+
+def set_phis(N, phi, seed: int): 
+    # seed para reproducibilidad
+    random.seed(seed)
+    
+    if N%2 != 0: 
+        N = N+1
+        
+    # mitad de N como entero 
+    half_N = int(N/2)
+    
+    phis: np.array = np.zeros(N)
+    
+    for i in range(0, half_N):
+        numero_aleatorio = random.choice([-1, 1])
+        phis[i] = phi*numero_aleatorio
+        phis[N-i-1] = -phi*numero_aleatorio
+        
+    return phis
+
+def set_thetas_from_phis(phis: np.array):
+    N = len(phis)
+    
+    thetas = np.zeros(N)
+    
+    thetas[0] = phis[0]- phis[N-1] + np.pi
+    
+    for i in range(1, N):
+        thetas[i] = phis[i] - phis[i-1] + np.pi
+        
+    return thetas
+      
+def make_resorte(N, l, phi, seed: int ):
+    if N%2 != 0: 
+        N = N+1
+        
+    # mitad de N como entero 
+    half_N = int(N/2)
+    
+    x = np.zeros(N)
+    y = np.zeros(N)
+
+    x[0] = 0
+    y[0] = 0
+    
+    phis = set_phis(N, phi, seed)
+    
+    for i in range(1, N):
+        x[i] = x[i-1] + l*np.cos(phis[i-1])
+        y[i] = y[i-1] + l*np.sin(phis[i-1])
+        
+    L_caja = N*l*np.cos(phi)
+    
+    thetas = set_thetas_from_phis(phis)
+    
+    
+    return x, y, phis, thetas, L_caja
+
+def plot_resorte(x: np.array, y: np.array, L_caja: float):
+    
+    x = np.append(x, x[0]+L_caja)
+    y = np.append(y, y[0])
+    
+    plt.plot(x, y, marker='o')
+    plt.xlim(0-0.01, L_caja+0.01)
+    plt.grid(True)
+    plt.show()
+    
+def save_resorte(x: np.array, 
+                 y: np.array, 
+                 phis: np.array,
+                 thetas: np.array, 
+                 L_caja: float,
+                 N: int,
+                 serial: int):
+                 
+    
+    df = pd.DataFrame({'x': x, 'y': y , 'phi': phis, 'theta': thetas})
+    name = 'resorte_' + str(N) + '_' + str(serial).zfill(5) + '.csv'
+    df.to_csv(name, index=False)
+
+if __name__ == '__main__':
+    N = 30
+    l = 1
+    
+    phi = np.pi/4
+    seed = 1 
+    
+    x, y, phis, thetas, L_caja = make_resorte(N, l, phi, seed)
+    
+    # save resorte
+    save_resorte(x, y, phis, thetas, L_caja, N, seed)
+    
+    print('Largo de la caja: ', L_caja)
+    print('phis: ', phis * 180/np.pi)
+    print('thetas: ', thetas * 180/np.pi)
+    
+    # plot resorte
+    plot_resorte(x, y, L_caja)
+    
