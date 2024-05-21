@@ -76,7 +76,19 @@ def plot_spring(x, y, L_caja, ax):
     ax.set_ylim(-3, 3)
     ax.grid(True)
     ax.set_aspect('equal', 'box') 
+    ax.set_title('Spring Evolution')
     
+def plot_lambda_vs_L(L_vector, lambda_ML_vector, ax):
+    ax.clear()
+    ax.plot(L_vector, lambda_ML_vector, marker='o')
+    ax.grid(True)
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.set_ylabel('Lambda')
+    ax.set_xlabel('(L-L0)/L0')
+    ax.set_title('Lambda vs (L-L0)/L0')
+    
+
 # Guardar resorte
 def save_spring(x: np.array, 
                  y: np.array, 
