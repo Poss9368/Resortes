@@ -21,7 +21,7 @@ if __name__ == "__main__":
     lambda_ML = 0
     
     fig1, ax1 = plt.subplots(figsize=(15, 2))
-    fig2, ax2 = plt.subplots(figsize=(5 , 4))
+    #fig2, ax2 = plt.subplots(figsize=(5 , 4))
     plot_spring(x0, y0, L0, ax1)
     plt.pause(0.05)
     input("Press Enter to continue...")
@@ -59,7 +59,7 @@ if __name__ == "__main__":
         print('Step:', itr+1, 'Largo actual:', L, 'Largo máximo:', L_max, 'lambda:', lambda_ML)
        
         plot_spring(x, y, L, ax1)
-        plot_lambda_vs_L(L_vector_cache[:itr+1], lambda_ML_vector_cache[:itr+1], ax2)
+        #plot_lambda_vs_L(L_vector_cache[:itr+1], lambda_ML_vector_cache[:itr+1], ax2)
         plt.pause(0.05)
         
 
