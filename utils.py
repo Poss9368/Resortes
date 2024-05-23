@@ -23,6 +23,18 @@ def set_phis(N, phi, seed: int):
         
     return phis
 
+# Funciones que determina los N phis iniciales para un zigzag
+def set_phis_zigzag(N, phi, seed: int):
+    if N%2 != 0: 
+        N = N+1
+
+    phis = np.zeros(N)
+    phis[0] = phi
+    for i in range(1, N):
+        phis[i] = -phis[i-1]
+    
+    return phis
+
 # calcula thetas desde phis
 def set_thetas_from_phis(phis: np.array):
     N = len(phis)
@@ -57,8 +69,19 @@ def make_spring(N, l0, phi, seed: int ):
     if N%2 != 0: 
         N = N+1
         
-    
     phis = set_phis(N, phi, seed)
+    x, y = set_positions_from_phis(phis, l0)
+    thetas = set_thetas_from_phis(phis)
+    L_caja = N*l0*np.cos(phi)
+    L_max  = N*l0
+    
+    return x, y, phis, thetas, L_caja, L_max
+
+def make_spring_zigzag(N, l0, phi, seed: int):
+    if N%2 != 0: 
+        N = N+1
+        
+    phis = set_phis_zigzag(N, phi, seed)
     x, y = set_positions_from_phis(phis, l0)
     thetas = set_thetas_from_phis(phis)
     L_caja = N*l0*np.cos(phi)
@@ -67,16 +90,17 @@ def make_spring(N, l0, phi, seed: int ):
     return x, y, phis, thetas, L_caja, L_max
     
 # Plotear resorte
-def plot_spring(x, y, L_caja, ax):
+def plot_spring(x, y, L_caja, L_plot, y_plot, lambda_ML, ax):
     ax.clear()
     x = np.append(x, x[0] + L_caja)
     y = np.append(y, y[0])
     ax.plot(x, y, marker='o')
-    ax.set_xlim(-0.005, L_caja + 0.005)
-    ax.set_ylim(-3, 3)
+    ax.set_xlim(-0.005, L_plot + 0.005)
+    ax.set_ylim(-y_plot, y_plot)
     ax.grid(True)
     ax.set_aspect('equal', 'box') 
     ax.set_title('Spring Evolution')
+    ax.legend(['Lambda: {:.5f}'.format(lambda_ML)])
     
 def plot_lambda_vs_L(L_vector, lambda_ML_vector, ax):
     ax.clear()

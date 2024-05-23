@@ -6,7 +6,7 @@ from utils import *
 
 if __name__ == "__main__":
     iteraciones = 60   # numero de iteraciones por simulación
-    lambda_ML_vector = np.logspace(-3,1 , iteraciones)  # Vector de lambdas a probar, en escala logarítmica
+    lambda_ML_vector = np.logspace(-4,1 , iteraciones)  # Vector de lambdas a probar, en escala logarítmica
     presicion = 1e-11 # Presición para la minimización
     
     N  = 100 # Número de eslabones y partículas
@@ -16,13 +16,15 @@ if __name__ == "__main__":
     
     seed = 1  # Semilla para reproducibilidad
     x0, y0, phis0, thetas0, L0, L_max= make_spring(N, l0, phi, seed) # Crear resorte
+    #x0, y0, phis0, thetas0, L0, L_max= make_spring_zigzag(N, l0, phi, seed) # Crear resorte zigzag
     phis = phis0.copy() # Copiar phis para guardar el estado inicial
     step_size = 0.1
     lambda_ML = 0
     
+    y_plot = np.sqrt(N/2)*l0*np.sin(phi)*1.3
+    
     fig1, ax1 = plt.subplots(figsize=(15, 2))
-    #fig2, ax2 = plt.subplots(figsize=(5 , 4))
-    plot_spring(x0, y0, L0, ax1)
+    plot_spring(x0, y0, L0, L_max,y_plot, lambda_ML, ax1)
     plt.pause(0.05)
     input("Press Enter to continue...")
     
@@ -58,9 +60,14 @@ if __name__ == "__main__":
         
         print('Step:', itr+1, 'Largo actual:', L, 'Largo máximo:', L_max, 'lambda:', lambda_ML)
        
-        plot_spring(x, y, L, ax1)
-        #plot_lambda_vs_L(L_vector_cache[:itr+1], lambda_ML_vector_cache[:itr+1], ax2)
+        
+        plot_spring(x, y, L, L_max, y_plot, lambda_ML, ax1)
         plt.pause(0.05)
+    fig2, ax2 = plt.subplots(figsize=(5 , 4))
+    plot_lambda_vs_L(L_vector_cache[:itr+1], lambda_ML_vector_cache[:itr+1], ax2)
+    plt.show()
+        
+    
         
 
     
