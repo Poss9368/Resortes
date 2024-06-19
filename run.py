@@ -6,7 +6,7 @@ import multiprocessing
 from utils import *
 
 PATH_RESULTS = 'results/'
-N = 64*32 # Número de eslabones y partículas
+N = 64*64 # Número de eslabones y partículas
 
 def run_simulation(simulation):
         lambda_ML_min = -6 # Mínimo valor de lambda en --ESCALA LOGARÍTMICA--
