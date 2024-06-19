@@ -39,8 +39,8 @@ if __name__ == "__main__":
     for i in range(7):
         N = 32*2**i
         
-        avg_df = calculate_and_save_average(N, simulation_to_read) # Uncomment this line to calculate the average data and save it to a file
-        ## avg_df = read_average_data(N) # Uncomment this line to read the average data from a file
+        ##avg_df = calculate_and_save_average(N, simulation_to_read) # Uncomment this line to calculate the average data and save it to a file
+        avg_df = read_average_data(N) # Uncomment this line to read the average data from a file
         
         delta_gamma = (avg_df['L'].values - avg_df['L_0'].values[0])/avg_df['L_0'].values[0]
         lambda_ML_vector = avg_df['lambda'].values
