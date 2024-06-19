@@ -49,7 +49,8 @@ if __name__ == "__main__":
             if f_aux_2 < f_aux_1:
                 alpha_CG = f_aux_2/f_aux_1
             else:
-                alpha_CG = f_aux_1/f_aux_2
+                alpha_CG = 0.0
+                ##alpha_CG = f_aux_1/f_aux_2
             
             f_aux_1 = f_aux_2    
             
