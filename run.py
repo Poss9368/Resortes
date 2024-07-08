@@ -4,10 +4,10 @@ import numpy as np
 import random 
 import matplotlib.pyplot as plt
 import multiprocessing
-from utils import *
+from utils.utils import *
 
 PATH_RESULTS = 'results/'
-N = 64*64*2 # Número de eslabones y partículas
+N = 1024 # Número de eslabones y partículas
 
 def run_simulation(simulation):
     lambda_ML_min = -6 # Mínimo valor de lambda en --ESCALA LOGARÍTMICA--
@@ -17,13 +17,13 @@ def run_simulation(simulation):
         
     presicion = 1e-10 # Presición para la minimización
 
-    l0 = 1 # Longitud de los eslabones
     k  = 1  # Constante del resorte
     phi  = np.pi/4 # angulo inicial
+    exponente: float = 0.5
         
     seed = simulation + 123
-    x0, y0, phis0, thetas0, L0, L_max= make_spring(N, l0, phi, seed) # Crear resorte
-    save_spring(x0, y0, phis0, thetas0, N, simulation, 0, PATH_RESULTS) # Guardar estado inicial
+    x0, y0, l0, phis0, thetas0, L_inicial, L_max= make_spring(N, phi, exponente, seed) # Crear resorte
+    save_spring(x0, y0, l0, phis0, thetas0, N, exponente,  simulation, 0, PATH_RESULTS) # Guardar estado inicial
         
     phis = phis0.copy() # Copiar phis para guardar el estado inicial
     step_size = 0.1  # Tamaño del paso de integración para minimización
@@ -58,18 +58,18 @@ def run_simulation(simulation):
         # Guardar información de la simulación en la lista para guardarla en un archivo
         data.append({'L': L, 
                      'L_max': L_max, 
-                     'L_0': L0, 
+                     'L_0': L_inicial,
                      'lambda': lambda_ML}) 
-        
+         
         # Imprimir en consola el paso actual --NO USAR EN PARALELO-- 
         #print('Step:', itr+1, 'Largo actual:', L, 'Largo máximo:', L_max, 'lambda:', lambda_ML) 
     
-    save_evolution(data, N, simulation, PATH_RESULTS) # Guardar evolución de la simulación
+    save_evolution(data, N, exponente, simulation, PATH_RESULTS) # Guardar evolución de la simulación
 
 
 
 RUN_IN_PARALLEL = True # Correr simulaciones en paralelo
-NUM_CORES = 16 # Número de núcleos a utilizar
+NUM_CORES = 8 # Número de núcleos a utilizar
 
 if __name__ == "__main__": 
     t0 = time.time() # Iniciar contador de tiempo

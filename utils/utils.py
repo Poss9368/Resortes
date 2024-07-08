@@ -15,13 +15,43 @@ def set_phis(N, phi, seed: int):
     half_N: float = int(N/2)
     
     phis: np.array = np.zeros(N)
+    l0: np.array = np.zeros(N)
+    
+    for i in range(0, half_N):
+        numero_aleatorio = random.choice([-1, 1])
+        phis[i] = phi*numero_aleatorio
+        phis[N-i-1] = -phi*numero_aleatorio
+        l0[i] = 1
+        l0[N-i-1] = 1
+        
+    return phis, l0
+
+# Funcion que determina los N phis iniciales para un resorte difusivo
+def set_phis_difusivo(N, phi, seed: int, exponent: float = 0.5):
+    # seed para reproducibilidad
+    random.seed(seed)
+    
+    if N%2 != 0: 
+        N = N+1
+        
+    #Mitad de N como entero 
+    half_N: float = int(N/2)
+    
+    phis: np.array = np.zeros(N)
+    l0: np.array = np.zeros(N)
     
     for i in range(0, half_N):
         numero_aleatorio = random.choice([-1, 1])
         phis[i] = phi*numero_aleatorio
         phis[N-i-1] = -phi*numero_aleatorio
         
-    return phis
+        l0[i] = (i+1)**(exponent-0.5)
+        l0[N-i-1] = l0[i]
+    
+    escala= N / np.sum(l0)
+    l0 = l0 * escala
+    
+    return phis, l0
 
 # Funciones que determina los N phis iniciales para un zigzag
 def set_phis_zigzag(N, phi, seed: int):
@@ -29,9 +59,14 @@ def set_phis_zigzag(N, phi, seed: int):
         N = N+1
 
     phis = np.zeros(N)
+    l0 = np.zeros(N)
+    
     phis[0] = phi
+    l0[0] = 1 
+    
     for i in range(1, N):
         phis[i] = -phis[i-1]
+        l0[i] = 1
     
     return phis
 
@@ -49,7 +84,7 @@ def set_thetas_from_phis(phis: np.array):
     return thetas
       
 # Calcular posiciones desde phis y l0
-def set_positions_from_phis(phis: np.array, l0: float):
+def set_positions_from_phis(phis: np.array, l0: np.array):
     N = len(phis)
     
     x = np.zeros(N)
@@ -59,35 +94,36 @@ def set_positions_from_phis(phis: np.array, l0: float):
     y[0] = 0
     
     for i in range(1, N):
-        x[i] = x[i-1] + l0*np.cos(phis[i-1])
-        y[i] = y[i-1] + l0*np.sin(phis[i-1])
+        x[i] = x[i-1] + l0[i-1] * np.cos(phis[i-1])
+        y[i] = y[i-1] + l0[i-1] * np.sin(phis[i-1])
         
     return x, y
 
 # Crear resorte desde N, l0, phi y seed
-def make_spring(N, l0, phi, seed: int ):
+def make_spring(N, phi, exponente: float, seed: int ):
     if N%2 != 0: 
         N = N+1
         
-    phis = set_phis(N, phi, seed)
+    phis, l0 = set_phis_difusivo(N, phi, seed, exponente)
     x, y = set_positions_from_phis(phis, l0)
     thetas = set_thetas_from_phis(phis)
-    L_caja = N*l0*np.cos(phi)
-    L_max  = N*l0
+    L_caja = np.sum(l0 * np.cos(phis))
+    L_max  = np.sum(l0)
     
-    return x, y, phis, thetas, L_caja, L_max
+    return x, y, l0, phis, thetas, L_caja, L_max
 
-def make_spring_zigzag(N, l0, phi, seed: int):
+# Crea resorte en zigzag
+def make_spring_zigzag(N, phi, seed: int):
     if N%2 != 0: 
         N = N+1
         
-    phis = set_phis_zigzag(N, phi, seed)
+    phis, l0 = set_phis_zigzag(N, phi, seed)
     x, y = set_positions_from_phis(phis, l0)
     thetas = set_thetas_from_phis(phis)
-    L_caja = N*l0*np.cos(phi)
-    L_max  = N*l0
+    L_caja =  np.dot(l0, np.cos(phi))
+    L_max  = np.sum(l0)
     
-    return x, y, phis, thetas, L_caja, L_max
+    return x, y, l0, phis, thetas, L_caja, L_max
     
 # Plotear resorte
 def plot_spring(x, y, L_caja, L_plot, y_plot, lambda_ML, ax):
@@ -102,6 +138,7 @@ def plot_spring(x, y, L_caja, L_plot, y_plot, lambda_ML, ax):
     ax.set_title('Spring Evolution')
     ax.legend(['Lambda: {:.5f}'.format(lambda_ML)])
     
+# Plotear lambda vs L
 def plot_lambda_vs_L(L_vector, lambda_ML_vector, ax):
     ax.clear()
     ax.plot(L_vector, lambda_ML_vector, marker='o')
@@ -112,29 +149,31 @@ def plot_lambda_vs_L(L_vector, lambda_ML_vector, ax):
     ax.set_xlabel('(L-L0)/L0')
     ax.set_title('Lambda vs (L-L0)/L0')
     
-
 # Guardar resorte
 def save_spring(x: np.array, 
                  y: np.array, 
+                 l0: np.array,
                  phis: np.array,
                  thetas: np.array, 
                  N: int,
+                 exponente: float,
                  serial: int,
                  step: int,
                  path: str):
                  
-    df = pd.DataFrame({'x': x, 'y': y , 'phi': phis, 'theta': thetas})
-    name = path +'/spring_position_' + str(N) + '_' + str(serial).zfill(5) + '_step_' + str(step).zfill(6) + '.csv'
+    df = pd.DataFrame({'x': x, 'y': y , 'l0': l0, 'phi': phis, 'theta': thetas})
+    name = path +'/spring_position_' + str(N) + '_' +  str(exponente)  + '_'+ str(serial).zfill(5) + '_step_' + str(step).zfill(6) + '.csv'
     df.to_csv(name, index=False)
     
 # Guardar evolución del resorte
 def save_evolution(data: list,
                    N: int,
+                   exponente: float,
                    simulation_number: int,
                    path: str):
     
     df = pd.DataFrame(data)
-    file_name =  path + '/spring_evolution_' + str(N) + '_' + str(simulation_number).zfill(5) + '.csv'
+    file_name =  path + '/spring_evolution_' + str(N) + '_'  + str(exponente) +   '_' + str(simulation_number).zfill(5) + '.csv'
     df.to_csv(file_name, index=False)
 
 # Función de potencial
@@ -163,11 +202,11 @@ def potential_gradient(phis: np.array, phis_0: np.array, k: float):
     return phi_punto
     
 # Función de restricción
-def constraint_term(phis, L, l0):
-    return L - np.sum(l0*np.cos(phis)) 
+def constraint_term(phis: np.array , L, l0: np.array ):
+    return L - np.dot(l0, np.cos(phis)) 
 
 # Gradiente de la función de restricción
-def constraint_term_gradient(phis,l0):
+def constraint_term_gradient(phis: np.array ,l0: np.array):
     return l0*np.sin(phis)
 
 # Función del Hamiltoniano modificado
@@ -184,5 +223,5 @@ def mean_force(phis_punto_punto):
     return np.sqrt(np.mean(phis_punto_punto**2))
         
 # Función para calcular la extensión total
-def calculate_total_extention(phis, l0):
-    return np.sum(l0*np.cos(phis))
+def calculate_total_extention(phis: np.array, l0: np.array):
+    return np.dot(l0, np.cos(phis))

@@ -1,7 +1,7 @@
 import numpy as np
 import random 
 import matplotlib.pyplot as plt
-from utils import *
+from utils.utils import *
 
 
 if __name__ == "__main__":
