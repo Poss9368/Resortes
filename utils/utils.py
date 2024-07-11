@@ -4,7 +4,7 @@ import random
 import matplotlib.pyplot as plt
 
 # Funciones que determina los N phis iniciales desde una variable aleatoria
-def set_phis(N, phi, seed: int): 
+def set_phis(N: int, phi: float, seed: int): 
     # seed para reproducibilidad
     random.seed(seed)
     
@@ -27,7 +27,7 @@ def set_phis(N, phi, seed: int):
     return phis, l0
 
 # Funcion que determina los N phis iniciales para un resorte difusivo
-def set_phis_difusivo(N, phi, seed: int, exponent: float = 0.5):
+def set_phis_difusivo(N: int, phi: float, seed: int, exponent: float = 0.5):
     # seed para reproducibilidad
     random.seed(seed)
     
@@ -54,7 +54,7 @@ def set_phis_difusivo(N, phi, seed: int, exponent: float = 0.5):
     return phis, l0
 
 # Funciones que determina los N phis iniciales para un zigzag
-def set_phis_zigzag(N, phi, seed: int):
+def set_phis_zigzag(N: int, phi: float, seed: int):
     if N%2 != 0: 
         N = N+1
 
@@ -74,7 +74,7 @@ def set_phis_zigzag(N, phi, seed: int):
 def set_thetas_from_phis(phis: np.array):
     N = len(phis)
     
-    thetas = np.zeros(N)
+    thetas: np.array = np.zeros(N)
     
     thetas[0] = phis[0]- phis[N-1] + np.pi
     
@@ -87,8 +87,8 @@ def set_thetas_from_phis(phis: np.array):
 def set_positions_from_phis(phis: np.array, l0: np.array):
     N = len(phis)
     
-    x = np.zeros(N)
-    y = np.zeros(N)
+    x: np.array = np.zeros(N)
+    y: np.array = np.zeros(N)
     
     x[0] = 0
     y[0] = 0
@@ -100,14 +100,14 @@ def set_positions_from_phis(phis: np.array, l0: np.array):
     return x, y
 
 # Crear resorte desde N, l0, phi y seed
-def make_spring(N, phi, exponente: float, seed: int ):
+def make_spring(N: int, phi: float, exponente: float, seed: int ):
     if N%2 != 0: 
         N = N+1
         
     phis, l0 = set_phis_difusivo(N, phi, seed, exponente)
     x, y = set_positions_from_phis(phis, l0)
     thetas = set_thetas_from_phis(phis)
-    L_caja = np.sum(l0 * np.cos(phis))
+    L_caja = np.dot(l0,np.cos(phis))
     L_max  = np.sum(l0)
     
     return x, y, l0, phis, thetas, L_caja, L_max
@@ -120,7 +120,7 @@ def make_spring_zigzag(N, phi, seed: int):
     phis, l0 = set_phis_zigzag(N, phi, seed)
     x, y = set_positions_from_phis(phis, l0)
     thetas = set_thetas_from_phis(phis)
-    L_caja =  np.dot(l0, np.cos(phi))
+    L_caja =  np.dot(l0,np.cos(phis))
     L_max  = np.sum(l0)
     
     return x, y, l0, phis, thetas, L_caja, L_max

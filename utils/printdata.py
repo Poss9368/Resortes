@@ -35,17 +35,17 @@ if __name__ == "__main__":
     fig1, ax1 = plt.subplots(figsize=(12 , 8))
     ax1.clear()
 
+    exponentes = [0.1, 0.25, 0.5, 0.75] 
     simulation_to_read = 16
     for i in range(1):
-        N = 1024
-        exponente  = 0.5
-        
-        avg_df = calculate_and_save_average(N, exponente,  simulation_to_read) # Uncomment this line to calculate the average data and save it to a file
-        #avg_df = read_average_data(N, exponente ) # Uncomment this line to read the average data from a file
-        
-        delta_gamma = (avg_df['L'].values - avg_df['L_0'].values[0])/avg_df['L_0'].values[0]
-        lambda_ML_vector = avg_df['lambda'].values
-        ax1.plot(delta_gamma, lambda_ML_vector, marker='o', label='N = ' + str(N))
+        N = 1024*(2**i)
+        for exp in exponentes:    
+            avg_df = calculate_and_save_average(N, exp,  simulation_to_read) # Uncomment this line to calculate the average data and save it to a file
+            #avg_df = read_average_data(N, exponente ) # Uncomment this line to read the average data from a file
+            
+            delta_gamma = (avg_df['L'].values - avg_df['L_0'].values[0])/avg_df['L_0'].values[0]
+            lambda_ML_vector = avg_df['lambda'].values
+            ax1.plot(delta_gamma, lambda_ML_vector, marker='o', label='N = ' + str(N))
         
     ax1.grid(True)
     ax1.set_xscale('log')

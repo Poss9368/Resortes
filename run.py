@@ -7,22 +7,22 @@ import multiprocessing
 from utils.utils import *
 
 PATH_RESULTS = 'results/'
-N = 1024 # Número de eslabones y partículas
+N = 64*16 # Número de eslabones y partículas
 
 def run_simulation(simulation):
-    lambda_ML_min = -6 # Mínimo valor de lambda en --ESCALA LOGARÍTMICA--
-    lambda_ML_max = 1  # Máximo valor de lambda en --ESCALA LOGARÍTMICA--
-    iteraciones = (lambda_ML_max - lambda_ML_min)*5 + 1 # Número de iteraciones
+    lambda_ML_min = -6.8 # Mínimo valor de lambda en --ESCALA LOGARÍTMICA--
+    lambda_ML_max = 0.2  # Máximo valor de lambda en --ESCALA LOGARÍTMICA--
+    iteraciones = int((lambda_ML_max - lambda_ML_min)*5 + 1) # Número de iteraciones
     lambda_ML_vector = np.logspace(lambda_ML_min, lambda_ML_max, iteraciones) # Vector de lambdas
         
     presicion = 1e-10 # Presición para la minimización
 
     k  = 1  # Constante del resorte
     phi  = np.pi/4 # angulo inicial
-    exponente: float = 0.5
+    exponente: float = 0.1
         
     seed = simulation + 123
-    x0, y0, l0, phis0, thetas0, L_inicial, L_max= make_spring(N, phi, exponente, seed) # Crear resorte
+    x0, y0, l0, phis0, thetas0, L_inicial, L_max = make_spring(N, phi, exponente, seed) # Crear resorte
     save_spring(x0, y0, l0, phis0, thetas0, N, exponente,  simulation, 0, PATH_RESULTS) # Guardar estado inicial
         
     phis = phis0.copy() # Copiar phis para guardar el estado inicial
@@ -69,7 +69,7 @@ def run_simulation(simulation):
 
 
 RUN_IN_PARALLEL = True # Correr simulaciones en paralelo
-NUM_CORES = 8 # Número de núcleos a utilizar
+NUM_CORES = 16 # Número de núcleos a utilizar
 
 if __name__ == "__main__": 
     t0 = time.time() # Iniciar contador de tiempo
