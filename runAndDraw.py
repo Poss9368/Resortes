@@ -9,13 +9,13 @@ if __name__ == "__main__":
     lambda_ML_vector = np.logspace(-4, 0.1, iteraciones)  # Vector de lambdas a probar, en escala logarítmica
     presicion = 1e-11 # Presición para la minimización
     
-    N  = 1024 # Número de eslabones y partículas
+    N  = 512 # Número de eslabones y partículas
     l0 = 1 # Longitud de los eslabones
     k  = 1  # Constante del resorte
     phi  = np.pi/4 # angulo inicial
     
     seed = 1  # Semilla para reproducibilidad
-    x0, y0, l0, phis0, thetas0, L_inicial, L_max= make_spring(N, phi, 0.1, seed) # Crear resorte
+    x0, y0, l0, phis0, thetas0, L_inicial, L_max= make_spring(N, phi, 0.0, seed) # Crear resorte
     #x0, y0, phis0, thetas0, L0, L_max= make_spring_zigzag(N, l0, phi, seed) # Crear resorte zigzag
     phis = phis0.copy() # Copiar phis para guardar el estado inicial
     step_size = 0.1

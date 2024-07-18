@@ -3,6 +3,51 @@ import numpy as np
 import random 
 import matplotlib.pyplot as plt
 
+from utils.plotsetphis import sing
+
+def set_phis_difusivo_2(N: int, phi: float, seed: int, exponent: float = 0):
+    
+    # seed para reproducibilidad
+    random.seed(seed)
+    
+    if N%2 != 0: 
+        N = N+1
+        
+    #Mitad de N como entero 
+    half_N: float = int(N/2)
+    
+    phis: np.array = np.zeros(N)
+    l0: np.array = np.zeros(N)
+    
+    suma: float = 0
+    
+    for i in range(0, half_N):
+    
+        rnd = random.uniform(-1.0, 1.0)
+        
+        c = sing(suma) * abs(suma/(i+1))**exponent 
+        
+        if rnd > c:
+            numero_aleatorio = +1
+            suma += numero_aleatorio 
+        else:
+            numero_aleatorio = -1
+            suma += numero_aleatorio
+  
+        
+        phis[i] = numero_aleatorio
+        phis[N-i-1] = -numero_aleatorio
+        
+        l0[i] = 1.0
+        l0[N-i-1] = l0[i]
+    
+    
+    #l0 = l0 * (N / np.sum(l0))
+    phis = phis*phi 
+    
+    return phis, l0
+
+
 # Funciones que determina los N phis iniciales desde una variable aleatoria
 def set_phis(N: int, phi: float, seed: int): 
     # seed para reproducibilidad
@@ -104,7 +149,7 @@ def make_spring(N: int, phi: float, exponente: float, seed: int ):
     if N%2 != 0: 
         N = N+1
         
-    phis, l0 = set_phis_difusivo(N, phi, seed, exponente)
+    phis, l0 = set_phis_difusivo_2(N, phi, seed, exponente)
     x, y = set_positions_from_phis(phis, l0)
     thetas = set_thetas_from_phis(phis)
     L_caja = np.dot(l0,np.cos(phis))
@@ -162,7 +207,7 @@ def save_spring(x: np.array,
                  path: str):
                  
     df = pd.DataFrame({'x': x, 'y': y , 'l0': l0, 'phi': phis, 'theta': thetas})
-    name = path +'/spring_position_' + str(N) + '_' +  str(exponente)  + '_'+ str(serial).zfill(5) + '_step_' + str(step).zfill(6) + '.csv'
+    name = path +'/spring_position_' + str(N) + '_' + "E" + "{:.3f}".format(exponente)  + '_'+ str(serial).zfill(5) + '_step_' + str(step).zfill(6) + '.csv'
     df.to_csv(name, index=False)
     
 # Guardar evolución del resorte
@@ -173,7 +218,7 @@ def save_evolution(data: list,
                    path: str):
     
     df = pd.DataFrame(data)
-    file_name =  path + '/spring_evolution_' + str(N) + '_'  + str(exponente) +   '_' + str(simulation_number).zfill(5) + '.csv'
+    file_name =  path + '/spring_evolution_' + str(N) + '_'  + "E" + "{:.3f}".format(exponente) +   '_' + str(simulation_number).zfill(5) + '.csv'
     df.to_csv(file_name, index=False)
 
 # Función de potencial

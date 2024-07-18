@@ -9,12 +9,12 @@ def read_data(file_name: str) -> pd.DataFrame:
     return pd.read_csv(file_name)
 
 def read_average_data(N: int, exponente: float) -> pd.DataFrame:
-    return pd.read_csv(PATH_RESULTS + 'spring_evolution_' + str(N)+ '_' + str(exponente)  + '_average.csv')
+    return pd.read_csv(PATH_RESULTS + 'spring_evolution_' + str(N)+ '_' + "E" + "{:.3f}".format(exponente)  + '_average.csv')
 
 def calculate_and_save_average(N: int, exponente: float, simulation_to_read: int) -> pd.DataFrame:
     sum_df = None
     for step in range(simulation_to_read):
-        file_name = PATH_RESULTS + 'spring_evolution_' + str(N) + '_' + str(exponente) + '_' + str(step).zfill(5) + '.csv'
+        file_name = PATH_RESULTS + 'spring_evolution_' + str(N) + '_' + "E" + "{:.3f}".format(exponente) + '_' + str(step).zfill(5) + '.csv'
         data: pd.DataFrame = read_data(file_name)
         if sum_df is None:
             sum_df = data.copy()  # Inicializa sum_df con el primer DataFrame leído
@@ -25,7 +25,7 @@ def calculate_and_save_average(N: int, exponente: float, simulation_to_read: int
     avg_df = sum_df / simulation_to_read
     
     # Guarda el DataFrame promedio en un archivo CSV
-    avg_df.to_csv(PATH_RESULTS + 'spring_evolution_' + str(N) + '_' + str(exponente) + '_average.csv', index=False)
+    avg_df.to_csv(PATH_RESULTS + 'spring_evolution_' + str(N) + '_' + "E" + "{:.3f}".format(exponente) + '_average.csv', index=False)
     
     # Retorna el DataFrame promedio
     return avg_df
@@ -35,10 +35,10 @@ if __name__ == "__main__":
     fig1, ax1 = plt.subplots(figsize=(12 , 8))
     ax1.clear()
 
-    exponentes = [0.1, 0.25, 0.5, 0.75] 
+    exponentes = [0.25, 0.5  ] 
     simulation_to_read = 16
     for i in range(1):
-        N = 1024*(2**i)
+        N = 16384
         for exp in exponentes:    
             avg_df = calculate_and_save_average(N, exp,  simulation_to_read) # Uncomment this line to calculate the average data and save it to a file
             #avg_df = read_average_data(N, exponente ) # Uncomment this line to read the average data from a file
