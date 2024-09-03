@@ -3,7 +3,13 @@ import numpy as np
 import random 
 import matplotlib.pyplot as plt
 
-from utils.plotsetphis import sing
+def sing(x):
+    if x > 0:
+        return 1
+    elif x == 0:
+        return 0
+    else:
+        return -1
 
 def set_phis_difusivo_2(N: int, phi: float, seed: int, exponent: float = 0):
     
@@ -46,7 +52,6 @@ def set_phis_difusivo_2(N: int, phi: float, seed: int, exponent: float = 0):
     phis = phis*phi 
     
     return phis, l0
-
 
 # Funciones que determina los N phis iniciales desde una variable aleatoria
 def set_phis(N: int, phi: float, seed: int): 

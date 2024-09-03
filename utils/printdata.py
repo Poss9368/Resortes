@@ -35,10 +35,10 @@ if __name__ == "__main__":
     fig1, ax1 = plt.subplots(figsize=(12 , 8))
     ax1.clear()
 
-    exponentes = [0.25, 0.5  ] 
+    exponentes = [0.25] 
     simulation_to_read = 16
-    for i in range(1):
-        N = 16384
+    for i in range(7):
+        N = 512*(2**i)
         for exp in exponentes:    
             avg_df = calculate_and_save_average(N, exp,  simulation_to_read) # Uncomment this line to calculate the average data and save it to a file
             #avg_df = read_average_data(N, exponente ) # Uncomment this line to read the average data from a file
