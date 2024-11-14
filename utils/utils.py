@@ -3,16 +3,13 @@ import numpy as np
 import random 
 import matplotlib.pyplot as plt
 
-def sing(x):
-    if x > 0:
-        return 1
-    elif x == 0:
-        return 0
-    else:
-        return -1
+def generar_aleatorios_potencia(exponent, cantidad = 1):
+    # Generar números aleatorios siguiendo una distribución de potencia
+    r = np.random.uniform(0, 0.99, cantidad)
+    numeros = pow(1-r, 1/(1-exponent))
+    return numeros
 
-def set_phis_difusivo_2(N: int, phi: float, seed: int, exponent: float = 0):
-    
+def set_phis_difusivo(N: int, phi: float, seed: int, exponent: float = 2):
     # seed para reproducibilidad
     random.seed(seed)
     
@@ -26,30 +23,28 @@ def set_phis_difusivo_2(N: int, phi: float, seed: int, exponent: float = 0):
     l0: np.array = np.zeros(N)
     
     suma: float = 0
-    
+    numero_aleatorio = 1 
     for i in range(0, half_N):
-    
-        rnd = random.uniform(-1.0, 1.0)
-        
-        c = sing(suma) * abs(suma/(i+1))**exponent 
-        
-        if rnd > c:
-            numero_aleatorio = +1
-            suma += numero_aleatorio 
-        else:
-            numero_aleatorio = -1
-            suma += numero_aleatorio
+        #rnd = random.uniform(-1.0, 1.0)
+        #
+        #if rnd > 0:
+        #    numero_aleatorio = 1.0
+        #else:
+        #    numero_aleatorio = -1.0
   
+        if numero_aleatorio == 1:
+            numero_aleatorio = -1
+        else:
+            numero_aleatorio = 1
         
         phis[i] = numero_aleatorio
         phis[N-i-1] = -numero_aleatorio
         
-        l0[i] = 1.0
+        l0[i] =generar_aleatorios_potencia(exponent)
         l0[N-i-1] = l0[i]
     
-    
-    #l0 = l0 * (N / np.sum(l0))
     phis = phis*phi 
+    l0 = l0/np.sum(l0)*N
     
     return phis, l0
 
@@ -74,33 +69,6 @@ def set_phis(N: int, phi: float, seed: int):
         l0[i] = 1
         l0[N-i-1] = 1
         
-    return phis, l0
-
-# Funcion que determina los N phis iniciales para un resorte difusivo
-def set_phis_difusivo(N: int, phi: float, seed: int, exponent: float = 0.5):
-    # seed para reproducibilidad
-    random.seed(seed)
-    
-    if N%2 != 0: 
-        N = N+1
-        
-    #Mitad de N como entero 
-    half_N: float = int(N/2)
-    
-    phis: np.array = np.zeros(N)
-    l0: np.array = np.zeros(N)
-    
-    for i in range(0, half_N):
-        numero_aleatorio = random.choice([-1, 1])
-        phis[i] = phi*numero_aleatorio
-        phis[N-i-1] = -phi*numero_aleatorio
-        
-        l0[i] = (i+1)**(exponent-0.5)
-        l0[N-i-1] = l0[i]
-    
-    escala= N / np.sum(l0)
-    l0 = l0 * escala
-    
     return phis, l0
 
 # Funciones que determina los N phis iniciales para un zigzag
@@ -154,7 +122,7 @@ def make_spring(N: int, phi: float, exponente: float, seed: int ):
     if N%2 != 0: 
         N = N+1
         
-    phis, l0 = set_phis_difusivo_2(N, phi, seed, exponente)
+    phis, l0 = set_phis_difusivo(N, phi, seed, exponente)
     x, y = set_positions_from_phis(phis, l0)
     thetas = set_thetas_from_phis(phis)
     L_caja = np.dot(l0,np.cos(phis))
