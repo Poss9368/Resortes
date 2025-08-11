@@ -8,14 +8,13 @@ from utils.utils import *
 
 
 PATH_RESULTS = 'results/'
-N = 1024# Número de eslabones y partículas
+N = 128*8
 
 def run_simulation(simulation):
     lambda_ML_min = -7 # Mínimo valor de lambda en --ESCALA LOGARÍTMICA--
-    lambda_ML_max = -1  # Máximo valor de lambda en --ESCALA LOGARÍTMICA--
-    iteraciones = int((lambda_ML_max - lambda_ML_min)*4 + 1) # Número de iteraciones
+    lambda_ML_max = 1  # Máximo valor de lambda en --ESCALA LOGARÍTMICA--
+    iteraciones = int((lambda_ML_max - lambda_ML_min)*3 + 1) # Número de iteraciones
     lambda_ML_vector = np.logspace(lambda_ML_min, lambda_ML_max, iteraciones) # Vector de lambdas
-    iteraciones = iteraciones -2  
     presicion = 5e-9 # Presición para la minimización
 
     k  = 1  # Constante del resorte
@@ -23,15 +22,15 @@ def run_simulation(simulation):
     exponente: float = 2
         
     seed = simulation + 123
-    x0, y0, l0, phis0, thetas0, L_inicial, L_max = make_spring(N, phi, exponente, seed) # Crear resorte
-    save_spring(x0, y0, l0, phis0, thetas0, N, exponente,  simulation, 0, PATH_RESULTS) # Guardar estado inicial
+    x0, y0, l0, phis0, thetas0, L_inicial, L_max = make_spring(N, phi, seed) # Crear resorte
+    save_spring(x0, y0, l0, phis0, thetas0, N,  simulation, 0, PATH_RESULTS) # Guardar estado inicial
         
     phis = phis0.copy() # Copiar phis para guardar el estado inicial
     step_size = 0.1  # Tamaño del paso de integración para minimización
     lambda_ML = 0    # lambda del multiplicador de Lagrange, inicializado en 0
         
     data = []      # Lista para guardar la evolución de la simulación y guardarla en un archivo
-    for itr in range(iteraciones):
+    for itr in range(iteraciones-3):
         lambda_ML = lambda_ML_vector[itr]  
         alpha_CG = 0 
         phis_punto_punto_CG = np.zeros(N)
@@ -66,11 +65,11 @@ def run_simulation(simulation):
         # Imprimir en consola el paso actual --NO USAR EN PARALELO-- 
         #print('Step:', itr+1, 'Largo actual:', L, 'Largo máximo:', L_max, 'lambda:', lambda_ML) 
     
-    save_evolution(data, N, exponente, simulation, PATH_RESULTS) # Guardar evolución de la simulación
+    save_evolution(data, N, simulation, PATH_RESULTS) # Guardar evolución de la simulación
 
 
 RUN_IN_PARALLEL = True # Correr simulaciones en paralelo
-NUM_CORES = 16 # Número de núcleos a utilizar
+NUM_CORES = 8 # Número de núcleos a utilizar
 
 if __name__ == "__main__": 
     t0 = time.time() # Iniciar contador de tiempo

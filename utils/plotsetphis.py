@@ -3,62 +3,59 @@ import pandas as pd
 import numpy as np
 import random 
 import matplotlib.pyplot as plt
+from distribution_super_exp import SamplerSuperExp
+from distribution_power_law import SamplerPowerLaw
 
-def generar_aleatorios_potencia(exponent, cantidad = 1):
-    # Generar números aleatorios siguiendo una distribución de potencia
-    r = np.random.uniform(0, 0.99, cantidad)
-    numeros = pow(1-r, 1/(1-exponent))
-    return numeros
-
-def set_phis_difusivo(N: int, phi: float, seed: int, exponent: float = 2):
-    # seed para reproducibilidad
-    random.seed(seed)
-    
+def set_phis_difusivo(N: int, phi: float, seed: int):
+    # generador de números aleatorios con distribución definida
+    sampler = SamplerPowerLaw(alpha=2.5, tol=1e-9, seed=seed)
     if N%2 != 0: 
         N = N+1
         
     #Mitad de N como entero 
     half_N: float = int(N/2)
+    total_segment_length = 0
     
+    # Inicializar phis y l0
     phis: np.array = np.zeros(N)
     l0: np.array = np.zeros(N)
     
-    suma: float = 0
-    numero_aleatorio = 1
-    for i in range(0, half_N):
-        #rnd = random.uniform(-1.0, 1.0)
-        #
-        #if rnd > 0:
-        #    numero_aleatorio = 1.0
-        #else:
-        #    numero_aleatorio = -1.0
-  
-        if numero_aleatorio == 1:
-            numero_aleatorio = -1
+    # Inicializacion de orientación 
+    orientation = 1
+
+    i = 0
+    while total_segment_length < half_N:
+        if orientation == 1:
+            orientation = -1
         else:
-            numero_aleatorio = 1
+            orientation = 1
         
-        phis[i] = numero_aleatorio
-        phis[N-i-1] = -numero_aleatorio
-        
-        l0[i] =generar_aleatorios_potencia(exponent)
+        rand = sampler.sample()
+        i_temp = 0
+        while i_temp < rand and total_segment_length < half_N:
+            phis[i] = orientation
+            l0[i] = 1.0
+            total_segment_length += 1
+            i += 1
+            i_temp += 1
+    
+    ## reflejar phis y l0
+    for i in range(half_N):
+        phis[N-i-1] = -phis[i]
         l0[N-i-1] = l0[i]
-    
+
     phis = phis*phi 
-    l0 = l0/np.sum(l0)*N
-    
     return phis, l0
 
 
 if __name__ == '__main__':
-    N = 2000
+    N = 256
     phi =  np.pi/4
-    
     fig1, ax1 = plt.subplots(figsize=(7, 6))
     result = []
-    for i in range(0, 100):
+    for i in range(0, 20):
         seed = 123 + i
-        phis, l0 = set_phis_difusivo(N, phi, seed, exponent=1.1)
+        phis, l0 = set_phis_difusivo(N, phi, seed)
         
         y = [0]
         x = [0]
@@ -69,14 +66,6 @@ if __name__ == '__main__':
         ax1.plot(x, y)
         result.append(y[1:int(N/2)])
         
-        
-    fig2, ax2 = plt.subplots(figsize=(7, 6))
-    
-    # desviacion estandar de todos los elementos de la primera fila
-    ax2.plot(np.std(result, axis=0), label='std', color='blue' , marker='o')
-    ax2.grid(True)
-    ax2.set_xscale('log')
-    ax2.set_yscale('log')
 
     plt.show()
     

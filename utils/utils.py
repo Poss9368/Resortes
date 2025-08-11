@@ -2,50 +2,52 @@ import pandas as pd
 import numpy as np
 import random 
 import matplotlib.pyplot as plt
+from utils.distribution_super_exp import SamplerSuperExp
+from utils.distribution_power_law import SamplerPowerLaw
 
-def generar_aleatorios_potencia(exponent, cantidad = 1):
-    # Generar números aleatorios siguiendo una distribución de potencia
-    r = np.random.uniform(0, 0.99, cantidad)
-    numeros = pow(1-r, 1/(1-exponent))
-    return numeros
 
-def set_phis_difusivo(N: int, phi: float, seed: int, exponent: float = 2):
-    # seed para reproducibilidad
-    random.seed(seed)
+def set_phis_difusivo(N: int, phi: float, seed: int):
     
+    # generador de números aleatorios con distribución definida
+    #sampler = SamplerSuperExp(tol=1e-12, seed=seed)
+    sampler = SamplerPowerLaw(alpha=2.5, tol=1e-9, seed=seed)
+
     if N%2 != 0: 
         N = N+1
         
     #Mitad de N como entero 
     half_N: float = int(N/2)
+    total_segment_length = 0
     
+    # Inicializar phis y l0
     phis: np.array = np.zeros(N)
     l0: np.array = np.zeros(N)
     
-    suma: float = 0
-    numero_aleatorio = 1 
-    for i in range(0, half_N):
-        #rnd = random.uniform(-1.0, 1.0)
-        #
-        #if rnd > 0:
-        #    numero_aleatorio = 1.0
-        #else:
-        #    numero_aleatorio = -1.0
-  
-        if numero_aleatorio == 1:
-            numero_aleatorio = -1
+    # Inicializacion de orientación 
+    orientation = 1
+
+    i = 0
+    while total_segment_length < half_N:
+        if orientation == 1:
+            orientation = -1
         else:
-            numero_aleatorio = 1
+            orientation = 1
         
-        phis[i] = numero_aleatorio
-        phis[N-i-1] = -numero_aleatorio
-        
-        l0[i] =generar_aleatorios_potencia(exponent)
+        rand = sampler.sample()
+        i_temp = 0
+        while i_temp < rand and total_segment_length < half_N:
+            phis[i] = orientation
+            l0[i] = 1.0
+            total_segment_length += 1
+            i += 1
+            i_temp += 1
+    
+    ## reflejar phis y l0
+    for i in range(half_N):
+        phis[N-i-1] = -phis[i]
         l0[N-i-1] = l0[i]
-    
+
     phis = phis*phi 
-    l0 = l0/np.sum(l0)*N
-    
     return phis, l0
 
 # Funciones que determina los N phis iniciales desde una variable aleatoria
@@ -118,27 +120,14 @@ def set_positions_from_phis(phis: np.array, l0: np.array):
     return x, y
 
 # Crear resorte desde N, l0, phi y seed
-def make_spring(N: int, phi: float, exponente: float, seed: int ):
+def make_spring(N: int, phi: float, seed: int):
     if N%2 != 0: 
         N = N+1
         
-    phis, l0 = set_phis_difusivo(N, phi, seed, exponente)
+    phis, l0 = set_phis_difusivo(N, phi, seed)
     x, y = set_positions_from_phis(phis, l0)
     thetas = set_thetas_from_phis(phis)
     L_caja = np.dot(l0,np.cos(phis))
-    L_max  = np.sum(l0)
-    
-    return x, y, l0, phis, thetas, L_caja, L_max
-
-# Crea resorte en zigzag
-def make_spring_zigzag(N, phi, seed: int):
-    if N%2 != 0: 
-        N = N+1
-        
-    phis, l0 = set_phis_zigzag(N, phi, seed)
-    x, y = set_positions_from_phis(phis, l0)
-    thetas = set_thetas_from_phis(phis)
-    L_caja =  np.dot(l0,np.cos(phis))
     L_max  = np.sum(l0)
     
     return x, y, l0, phis, thetas, L_caja, L_max
@@ -174,24 +163,22 @@ def save_spring(x: np.array,
                  phis: np.array,
                  thetas: np.array, 
                  N: int,
-                 exponente: float,
                  serial: int,
                  step: int,
                  path: str):
                  
     df = pd.DataFrame({'x': x, 'y': y , 'l0': l0, 'phi': phis, 'theta': thetas})
-    name = path +'/spring_position_' + str(N) + '_' + "E" + "{:.3f}".format(exponente)  + '_'+ str(serial).zfill(5) + '_step_' + str(step).zfill(6) + '.csv'
+    name = path +'/spring_position_' + str(N)  + '_'+ str(serial).zfill(5) + '_step_' + str(step).zfill(6) + '.csv'
     df.to_csv(name, index=False)
     
 # Guardar evolución del resorte
 def save_evolution(data: list,
                    N: int,
-                   exponente: float,
                    simulation_number: int,
                    path: str):
     
     df = pd.DataFrame(data)
-    file_name =  path + '/spring_evolution_' + str(N) + '_'  + "E" + "{:.3f}".format(exponente) +   '_' + str(simulation_number).zfill(5) + '.csv'
+    file_name =  path + '/spring_evolution_' + str(N) +   '_' + str(simulation_number).zfill(5) + '.csv'
     df.to_csv(file_name, index=False)
 
 # Función de potencial
