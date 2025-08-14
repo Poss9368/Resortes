@@ -6,9 +6,10 @@ import matplotlib.pyplot as plt
 import multiprocessing
 from utils.utils import *
 
+DISTRIBUTION = 'super_exp' # 'power_law' , 'super_exp', 'geom'
+PATH_RESULTS = 'results/' + DISTRIBUTION + '/' # Ruta donde se guardarán los resultados
 
-PATH_RESULTS = 'results/'
-N = 128*8
+N = 128*32
 
 def run_simulation(simulation):
     lambda_ML_min = -7 # Mínimo valor de lambda en --ESCALA LOGARÍTMICA--
@@ -19,10 +20,9 @@ def run_simulation(simulation):
 
     k  = 1  # Constante del resorte
     phi  = np.pi/4 # angulo inicial
-    exponente: float = 2
         
     seed = simulation + 123
-    x0, y0, l0, phis0, thetas0, L_inicial, L_max = make_spring(N, phi, seed) # Crear resorte
+    x0, y0, l0, phis0, thetas0, L_inicial, L_max = make_spring(N, phi, seed, DISTRIBUTION) # Crear resorte inicial
     save_spring(x0, y0, l0, phis0, thetas0, N,  simulation, 0, PATH_RESULTS) # Guardar estado inicial
         
     phis = phis0.copy() # Copiar phis para guardar el estado inicial

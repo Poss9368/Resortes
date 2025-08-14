@@ -2,7 +2,20 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-PATH_RESULTS = 'results/'
+DISTRIBUTION = 'super_exp' # 'power_law' , 'super_exp', 'geom'
+PATH_RESULTS = 'results/' + DISTRIBUTION + '/' # Ruta donde se guardarán los resultados
+
+exp = {
+    'geom': 2.0,
+    'super_exp': 2,
+    'power_law': 1.6
+}
+
+scale = {
+    'geom': 7,
+    'super_exp': 10000,
+    'power_law': 0.1
+}
 
 ## read data 
 def read_data(file_name: str) -> pd.DataFrame:
@@ -36,26 +49,32 @@ if __name__ == "__main__":
     ax1.clear()
 
     simulation_to_read = 16
-    for i in range(3, 4):
+    for i in range(0, 3):
         N = 128*(2**i) 
-        #avg_df = calculate_and_save_average(N,  simulation_to_read) # Uncomment this line to calculate the average data and save it to a file
-        avg_df = read_average_data(N) # Uncomment this line to read the average data from a file
+        avg_df = calculate_and_save_average(N,  simulation_to_read) # Uncomment this line to calculate the average data and save it to a file
+        #avg_df = read_average_data(N) # Uncomment this line to read the average data from a file
         
         delta_gamma = (avg_df['L'].values - avg_df['L_0'].values[0])/avg_df['L_0'].values[0]
         #delta_gamma = delta_gamma/delta_gamma[5]
         lambda_ML_vector = avg_df['lambda'].values
         ax1.plot(delta_gamma , lambda_ML_vector, marker='o', label='N = ' + str(N))
     
+    fit_exp = exp[DISTRIBUTION]
+    fit_scale = scale[DISTRIBUTION]
+    ax1.plot(delta_gamma*10,fit_scale*delta_gamma**fit_exp, '--')
 
-    fit_exp = 3
-    ax1.plot(delta_gamma,30*delta_gamma**fit_exp, '--')
-
+    title = { 
+        'geom': 'Geométrica P(n) = p*(1-p)^(n-1); p = 0.5',
+        'super_exp': 'Super Exponencial P(n) = (n)^(-n)',
+        'power_law': 'Ley de Potencias P(n) = n^(-alpha); alpha = 2.5' 
+    }
+    ax1.legend()
     ax1.grid(True)
     ax1.set_xscale('log')
     ax1.set_yscale('log')
     ax1.set_ylabel('Lambda')
     ax1.set_xlabel('Delta Gamma')
-    ax1.set_title('Lambda vs Delta Gamma') 
+    ax1.set_title(title[DISTRIBUTION]) 
     plt.show()
     
         

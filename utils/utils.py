@@ -4,13 +4,20 @@ import random
 import matplotlib.pyplot as plt
 from utils.distribution_super_exp import SamplerSuperExp
 from utils.distribution_power_law import SamplerPowerLaw
+from utils.distribution_geom import SamplerGeom
 
 
-def set_phis_difusivo(N: int, phi: float, seed: int):
+def set_phis_difusivo(N: int, phi: float, seed: int, dist: str):
     
     # generador de números aleatorios con distribución definida
-    #sampler = SamplerSuperExp(tol=1e-12, seed=seed)
-    sampler = SamplerPowerLaw(alpha=2.5, tol=1e-9, seed=seed)
+    if dist == 'geom':
+        sampler = SamplerGeom(tol=1e-12, seed=seed)
+    elif dist == 'super_exp':  
+        sampler = SamplerSuperExp(tol=1e-14, seed=seed)
+    elif dist == 'power_law':
+        sampler = SamplerPowerLaw(alpha=2.5, tol=1e-9, seed=seed)
+    else:
+        raise ValueError("Distribución no soportada: {}".format(dist))
 
     if N%2 != 0: 
         N = N+1
@@ -120,11 +127,11 @@ def set_positions_from_phis(phis: np.array, l0: np.array):
     return x, y
 
 # Crear resorte desde N, l0, phi y seed
-def make_spring(N: int, phi: float, seed: int):
+def make_spring(N: int, phi: float, seed: int, dist: str = 'geom'):
     if N%2 != 0: 
         N = N+1
         
-    phis, l0 = set_phis_difusivo(N, phi, seed)
+    phis, l0 = set_phis_difusivo(N, phi, seed, dist)
     x, y = set_positions_from_phis(phis, l0)
     thetas = set_thetas_from_phis(phis)
     L_caja = np.dot(l0,np.cos(phis))
